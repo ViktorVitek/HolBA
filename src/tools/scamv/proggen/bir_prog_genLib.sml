@@ -223,12 +223,13 @@ fun pgen_qc_param param =
    | "xld_br_yld_mod1" => prog_gen_a_la_qc arb_program_xld_br_yld_mod1
    | "spectre_v1" => prog_gen_a_la_qc arb_program_spectre_v1
    | "spectre_v1_mod1" => prog_gen_a_la_qc arb_program_spectre_v1_mod1
-   | "straightline_branch" => prog_gen_a_la_qc arb_program_straightline_branch			  
+   | "straightline_branch" => prog_gen_a_la_qc arb_program_straightline_branch
+   | "riscv_test" => prog_gen_a_la_qc arb_program_load
    | _            => raise ERR "prog_gen_store_a_la_qc" "unknown qc generator";
 
 fun prog_gen_store_a_la_qc param sz    = prog_gen_store ("prog_gen_a_la_qc::"^param) true
   (lines_gen_fun (pgen_qc_param param))          sz;
-    
+
 fun prog_gen_store_rand_slice sz       = prog_gen_store "prog_gen_rand_slice"        true
   (lines_gen_fun bir_prog_gen_arm8_slice)        sz;
 fun prog_gen_store_prefetch_stride sz  = prog_gen_store "prog_gen_prefetch_stride"   true
