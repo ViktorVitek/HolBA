@@ -31,8 +31,11 @@ struct
 (* lifting infrastructure (handles retry of program generation also, in case of failure) *)
 (* ========================================================================================= *)
 
-  (* for arm8 *)
+  (* for arm8
   val (bmil_bir_lift_prog_gen, disassemble_fun) = (bmil_arm8.bir_lift_prog_gen, arm8AssemblerLib.arm8_disassemble);
+  *)
+  val bmil_bir_lift_prog_gen = bmil_riscv.bir_lift_prog_gen;
+
 
   (* this was copied -----> *)
   fun disassembly_section_to_minmax section =
