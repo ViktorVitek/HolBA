@@ -54,7 +54,7 @@ in
       fun rkv_to_json (k,v) =
         let
           (* TODO: Stack pointer needs to be handled *)
-          (* TODO: maybe want to check that we indeed get R0-R29 or whatever *) 
+          (* TODO: maybe want to check that we indeed get R0-R29 or whatever *)
           val _ = if String.isPrefix "R" k then () else
                     raise ERR "gen_json_state" "input not as exptected";
 
@@ -237,7 +237,7 @@ in
     in
       asm_lines
     end;
-  
+
   fun bir_embexp_code_to_prog code_asm =
     bir_embexp_code_to_prog_raw bir_embexp_prog_cleanup code_asm;
 
@@ -279,10 +279,10 @@ in
   (* embexp platform parameters *)
   (* ======================================== *)
   val embexp_params_code   = Arbnum.fromHexString    "0x2000";
-  val embexp_params_memory = (Arbnum.fromHexString "0x100000",
-                                  Arbnum.fromHexString  "0x40000");
+  val embexp_params_memory = (Arbnum.fromHexString "0x80000000",
+                                  Arbnum.fromHexString  "0x40000000");
 
-  fun embexp_params_cacheable x = Arbnum.+ (Arbnum.fromInt 0x80000000, x);
+  fun embexp_params_cacheable x = Arbnum.+ (Arbnum.fromInt 0x20000000, x);
 
   fun embexp_params_checkmemrange (MACHSTATE (_, (_, _, m))) =
     let
