@@ -20,11 +20,12 @@ datatype ArmInstruction =
          | Compare of Operand * Operand
          | Nop
          | Add     of Operand * Operand * Operand
-	 | Lsl     of Operand * Operand * Operand
+	        | Lsl     of Operand * Operand * Operand
+          | BranchCompare of BranchCond option * Operand (* * Operand * Operand *)
 
 (* pp *)
 local
-fun pp_operand (Imm n) = "" ^ Int.fmt StringCvt.HEX n
+fun pp_operand (Imm n) = "" ^ Int.fmt StringCvt.DEC n (*jumps are in dec, this seems to work*)
   | pp_operand (Ld (NONE, src)) = "" ^ src ^ ""
   | pp_operand (Ld (SOME offset, src)) =
     "" ^ Int.toString offset ^ "(" ^ src ^ ")"   (* "[" ^ src ^ ", #" ^ Int.toString offset ^ "]" *)
@@ -46,7 +47,7 @@ fun pp_cond bc =
       | NE => "ne"
       | LT => "lt"
       | GT => "gt"
-      | HS => "hs"
+      | HS => "gt" (*HS not in riscv, maybe can use gt instead*)
 
 fun pp_instr instr =
     case instr of
@@ -68,6 +69,8 @@ fun pp_instr instr =
        "add " ^ pp_operand target ^ ", " ^ pp_operand a ^ ", " ^ pp_operand b
      | Lsl (target,source ,b) =>
        "slli " ^ pp_operand target ^ ", " ^ pp_operand source ^ ", " ^ pp_operand b
+       | BranchCompare (SOME cond, target) =>
+         "b" ^ pp_cond cond ^ " x1, x2, " (* ^ pp_operand a ^ ", " ^ pp_operand b ^ ", " *) ^ pp_operand target
 in
 fun pp_program is = List.map pp_instr is;
 end
@@ -133,8 +136,13 @@ fun arb_program_cond bc_o cmpops arb_prog_left arb_prog_right =
     val arb_prog      = arb_prog_left  >>= (fn blockl =>
                         arb_prog_right >>= (fn blockr =>
                            let val blockl_wexit = blockl@[Branch (NONE, rel_jmp_after blockr)] in
-                             return ([Compare cmpops,
-                                      Branch (bc_o, rel_jmp_after blockl_wexit)]
+                           (*add arm return function, later change depending on arch
+                           return ([Compare cmpops,
+                                    Branch (bc_o, rel_jmp_after blockl_wexit)]
+                                  @blockl_wexit
+                                  @blockr)
+                           *)
+                             return ([BranchCompare (bc_o, rel_jmp_after blockl_wexit)]
                                     @blockl_wexit
                                     @blockr)
                            end
@@ -489,7 +497,7 @@ in
   fun arb_program_glue_spectre arb_prog_preamble_left arb_prog_right =
       let
   	  fun rel_jmp_after bl = Imm (((length bl) + 1) * 4);
-
+(*need to change this too, for riscv*)
   	  val arb_prog =arb_prog_preamble_left >>= (fn (prmbl, blockl) =>
                         arb_prog_right >>= (fn blockr =>
 

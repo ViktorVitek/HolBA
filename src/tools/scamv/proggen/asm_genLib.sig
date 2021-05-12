@@ -16,7 +16,8 @@ sig
             | Nop
             | Add     of Operand * Operand * Operand
 	    | Lsl     of Operand * Operand * Operand
-		      
+      | BranchCompare  of BranchCond option * Operand (* * Operand * Operand *)
+
     val pp_program : ArmInstruction list -> string list;
 
     val arb_addr : int Gen;
@@ -52,4 +53,3 @@ sig
 				   ArmInstruction list Gen -> ArmInstruction list Gen
     val arb_program_spectre : ArmInstruction list Gen
 end
-
