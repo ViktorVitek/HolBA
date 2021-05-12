@@ -21,7 +21,7 @@ datatype ArmInstruction =
          | Nop
          | Add     of Operand * Operand * Operand
 	        | Lsl     of Operand * Operand * Operand
-          | BranchCompare of BranchCond option * Operand (* * Operand * Operand *)
+          | BranchCompare of BranchCond option * Operand * Operand * Operand
 
 (* pp *)
 local
@@ -69,8 +69,8 @@ fun pp_instr instr =
        "add " ^ pp_operand target ^ ", " ^ pp_operand a ^ ", " ^ pp_operand b
      | Lsl (target,source ,b) =>
        "slli " ^ pp_operand target ^ ", " ^ pp_operand source ^ ", " ^ pp_operand b
-       | BranchCompare (SOME cond, target) =>
-         "b" ^ pp_cond cond ^ " x1, x2, " (* ^ pp_operand a ^ ", " ^ pp_operand b ^ ", " *) ^ pp_operand target
+       | BranchCompare (SOME cond, target, a, b) =>
+         "b" ^ pp_cond cond ^ " " ^ pp_operand a ^ ", " ^ pp_operand b ^ ", " ^ pp_operand target
 in
 fun pp_program is = List.map pp_instr is;
 end
@@ -132,6 +132,7 @@ val arb_program_load = arb_list_of arb_load_indir;
 fun arb_program_cond bc_o cmpops arb_prog_left arb_prog_right =
   let
     fun rel_jmp_after bl = Imm (((length bl) + 1) * 4);
+    val (areg, breg) = cmpops;
 
     val arb_prog      = arb_prog_left  >>= (fn blockl =>
                         arb_prog_right >>= (fn blockr =>
@@ -142,7 +143,7 @@ fun arb_program_cond bc_o cmpops arb_prog_left arb_prog_right =
                                   @blockl_wexit
                                   @blockr)
                            *)
-                             return ([BranchCompare (bc_o, rel_jmp_after blockl_wexit)]
+                             return ([BranchCompare (bc_o, rel_jmp_after blockl_wexit, areg, breg)]
                                     @blockl_wexit
                                     @blockr)
                            end
