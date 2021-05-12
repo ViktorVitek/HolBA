@@ -29,7 +29,7 @@ val lines = "";
 
       val _ = write_to_file path_asm_s input_code;
 
-      val commandline = (gcc_prefix ^ "gcc -o " ^ path_asm_o ^ " -c " ^ path_asm_s ^
+      val commandline = (gcc_prefix ^ "gcc -march=rv64g -o " ^ path_asm_o ^ " -c " ^ path_asm_s ^
                          " && " ^
                          gcc_prefix ^ "objdump -d " ^ path_asm_o ^ " > " ^ path_asm_da);
       (*val _ = print ("cl output: " ^ commandline);*)
