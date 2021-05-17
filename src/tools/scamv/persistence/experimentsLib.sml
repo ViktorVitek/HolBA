@@ -279,10 +279,10 @@ in
   (* embexp platform parameters *)
   (* ======================================== *)
   val embexp_params_code   = Arbnum.fromHexString    "0x2000";
-  val embexp_params_memory = (Arbnum.fromHexString "0x80000000",
-                                  Arbnum.fromHexString  "0x40000000");
+  val embexp_params_memory = (Arbnum.fromHexString "0x10000",
+                                  Arbnum.fromHexString  "0x40000");
 
-  fun embexp_params_cacheable x = Arbnum.+ (Arbnum.fromInt 0x20000000, x);
+  fun embexp_params_cacheable x = Arbnum.+ (Arbnum.fromInt 0xa0000000, x);
 
   fun embexp_params_checkmemrange (MACHSTATE (_, (_, _, m))) =
     let
