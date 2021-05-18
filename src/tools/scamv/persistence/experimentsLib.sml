@@ -270,8 +270,9 @@ in
 
   (* additional structured data *)
   (* ======================================== *)
-  datatype experiment_arch = ArchARM8;
-  fun exp_arch_to_string ArchARM8 = "arm8";
+  datatype experiment_arch = ArchRV64IMAC; (*datatype experiment_arch = ArchARM8;*)
+(*  fun exp_arch_to_string ArchARM8 = "arm8";*)
+  fun exp_arch_to_string ArchRV = "rv64imac";
 
   datatype experiment_type = ExperimentTypeStdTwo;
   fun exp_type_to_string ExperimentTypeStdTwo = "exps2";
@@ -279,10 +280,10 @@ in
   (* embexp platform parameters *)
   (* ======================================== *)
   val embexp_params_code   = Arbnum.fromHexString    "0x2000";
-  val embexp_params_memory = (Arbnum.fromHexString "0x10000",
+  val embexp_params_memory = (Arbnum.fromHexString "0x80000000",
                                   Arbnum.fromHexString  "0x40000");
 
-  fun embexp_params_cacheable x = Arbnum.+ (Arbnum.fromInt 0xa0000000, x);
+  fun embexp_params_cacheable x = Arbnum.+ (Arbnum.fromInt 0x20000000, x);
 
   fun embexp_params_checkmemrange (MACHSTATE (_, (_, _, m))) =
     let

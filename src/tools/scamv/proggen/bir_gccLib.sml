@@ -32,7 +32,9 @@ val lines = "";
       val commandline = (gcc_prefix ^ "gcc -march=rv64g -o " ^ path_asm_o ^ " -c " ^ path_asm_s ^
                          " && " ^
                          gcc_prefix ^ "objdump -d " ^ path_asm_o ^ " > " ^ path_asm_da);
-      (*val _ = print ("cl output: " ^ commandline);*)
+      val _ = print ("cl output: " ^ commandline);
+      (*-mabi=lp64 -mno-relax -mcmodel=medlow -mexplicit-relocs -Bstatic
+      -nostartfiles -nostdlib -std=gnu99 -Wall -fno-builtin -ggdb3*)
       val _ = if OS.Process.isSuccess (OS.Process.system commandline) then ()
               else raise ERR "bir_gcc_assembe_disassemble" "compilation failed somehow";
     in

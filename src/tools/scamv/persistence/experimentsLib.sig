@@ -36,7 +36,7 @@ signature experimentsLib = sig
 
   (* additional structured data *)
   (* ======================================== *)
-  datatype experiment_arch = ArchARM8;
+  datatype experiment_arch = ArchRV64IMAC;
   val exp_arch_to_string : experiment_arch -> string;
 
   datatype experiment_type = ExperimentTypeStdTwo;

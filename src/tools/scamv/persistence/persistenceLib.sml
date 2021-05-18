@@ -76,7 +76,7 @@ struct
          ("run_descr", holba_run_descr)];
 
       (* add metadata *)
-      val _ = List.map (fn (m_n, m_v) => 
+      val _ = List.map (fn (m_n, m_v) =>
         init_meta (mk_run_meta_handle (run_id, SOME m_n, "")) (SOME m_v)) run_metadata;
     in
       RunReferences (run_id, name, prog_l_id, exp_l_id)
@@ -213,7 +213,7 @@ struct
   (* ========================================================================================= *)
   fun run_create_prog arch prog run_metadata =
     let
-      val arch_id = exp_arch_to_string arch;
+      val arch_id = exp_arch_to_string arch; (*val _ = print ("cl output: " ^ commandline);*)
 
       val RunReferences (_, run_name, prog_l_id, _) = holba_run_id();
 
@@ -236,7 +236,7 @@ struct
 
       (* add metadata *)
       val meta_name = meta_name_log ^ "." ^ (get_dotfree_time ());
-      val _ = List.map (fn (m_n, m_v) => 
+      val _ = List.map (fn (m_n, m_v) =>
         init_meta (mk_prog_meta_handle (prog_id, SOME m_n, meta_name)) (SOME m_v)) run_metadata;
 
     in
@@ -268,7 +268,7 @@ struct
 
       (* add metadata *)
       val meta_name = meta_name_log ^ "." ^ (get_dotfree_time ());
-      val _ = List.map (fn (m_n, m_v) => 
+      val _ = List.map (fn (m_n, m_v) =>
         init_meta (mk_exp_meta_handle (exp_id, SOME m_n, meta_name)) (SOME m_v)) run_metadata;
     in
       exp_id
@@ -296,4 +296,3 @@ struct
     end;
 
 end
-

@@ -15,8 +15,9 @@ sig
             | Compare of Operand * Operand
             | Nop
             | Add     of Operand * Operand * Operand
-	    | Lsl     of Operand * Operand * Operand
-      | BranchCompare  of BranchCond option * Operand * Operand * Operand
+            | Lsl     of Operand * Operand * Operand
+            | BranchCompare  of BranchCond option * Operand * Operand * Operand
+            | Label of string
 
     val pp_program : ArmInstruction list -> string list;
 

@@ -22,11 +22,12 @@ datatype ArmInstruction =
          | Add     of Operand * Operand * Operand
 	        | Lsl     of Operand * Operand * Operand
           | BranchCompare of BranchCond option * Operand * Operand * Operand
+          | Label of string
 
 (* pp *)
 local
-fun pp_operand (Imm n) = "" ^ Int.fmt StringCvt.DEC n (*jumps are in dec, this seems to work*)
-  | pp_operand (Ld (NONE, src)) = "" ^ src ^ ""
+fun pp_operand (Imm n) = ".+0x" ^ Int.fmt StringCvt.HEX n (*could be that instead of 4, should be 1 per instruction*)
+  | pp_operand (Ld (NONE, src)) = "0(" ^ src ^ ")"
   | pp_operand (Ld (SOME offset, src)) =
     "" ^ Int.toString offset ^ "(" ^ src ^ ")"   (* "[" ^ src ^ ", #" ^ Int.toString offset ^ "]" *)
   | pp_operand (Ld2(src2, src)) =
@@ -35,7 +36,8 @@ fun pp_operand (Imm n) = "" ^ Int.fmt StringCvt.DEC n (*jumps are in dec, this s
 
 fun pp_opcode (Load _)    = "lw"
   | pp_opcode (Store _)  = "sw"
-  | pp_opcode (Branch _)  = "j"
+  (*| pp_opcode (Branch _)  = "j " (*translates to this from "j"*)*)
+  | pp_opcode (Branch _)  = "j " (*change name to label later? label2021:*)
   | pp_opcode (Compare _) = "fcmp"
   | pp_opcode (Nop)       = "nop"
   | pp_opcode (Add _)     = "add"
@@ -46,8 +48,8 @@ fun pp_cond bc =
         EQ => "eq"
       | NE => "ne"
       | LT => "lt"
-      | GT => "gt"
-      | HS => "gt" (*HS not in riscv, maybe can use gt instead*)
+      | GT => "ge" (*gt not base inst in riscv, maybe can use ge instead*)
+      | HS => "ge" (*HS not in riscv, maybe can use gt instead*)
 
 fun pp_instr instr =
     case instr of
@@ -57,7 +59,7 @@ fun pp_instr instr =
      | Store (source, target) =>
         pp_opcode instr ^ " " ^ pp_operand source ^ ", "
         ^ pp_operand target
-     |  Branch (NONE, target) =>
+     | Branch (NONE, target) =>
         "j " ^ pp_operand target
      | Branch (SOME cond, target) =>
        "b" ^ pp_cond cond ^ " " ^ pp_operand target
@@ -69,8 +71,10 @@ fun pp_instr instr =
        "add " ^ pp_operand target ^ ", " ^ pp_operand a ^ ", " ^ pp_operand b
      | Lsl (target,source ,b) =>
        "slli " ^ pp_operand target ^ ", " ^ pp_operand source ^ ", " ^ pp_operand b
-       | BranchCompare (SOME cond, target, a, b) =>
-         "b" ^ pp_cond cond ^ " " ^ pp_operand a ^ ", " ^ pp_operand b ^ ", " ^ pp_operand target
+     | BranchCompare (SOME cond, target, a, b) =>
+       "b" ^ pp_cond cond ^ " " ^ pp_operand a ^ ", " ^ pp_operand b ^ ", " ^ pp_operand target (*^ target if label use this*)(*add name of label here*)
+     | Label (name) =>
+         "" ^ name ^ ":"  (*persistenceLib cannot handle labels for now*)
 in
 fun pp_program is = List.map pp_instr is;
 end
@@ -131,12 +135,14 @@ val arb_program_load = arb_list_of arb_load_indir;
 
 fun arb_program_cond bc_o cmpops arb_prog_left arb_prog_right =
   let
-    fun rel_jmp_after bl = Imm (((length bl) + 1) * 4);
+    fun rel_jmp_after bl = Imm (((length bl) + 1) * 4); (*hmm*)
     val (areg, breg) = cmpops;
+
+    (*val labelstring = "label2021";*)
 
     val arb_prog      = arb_prog_left  >>= (fn blockl =>
                         arb_prog_right >>= (fn blockr =>
-                           let val blockl_wexit = blockl@[Branch (NONE, rel_jmp_after blockr)] in
+                           let val blockl_wexit = blockl@[Branch (NONE, rel_jmp_after blockr)] in (*Label(labelstring), Nop*)
                            (*add arm return function, later change depending on arch
                            return ([Compare cmpops,
                                     Branch (bc_o, rel_jmp_after blockl_wexit)]
@@ -165,6 +171,12 @@ fun arb_program_cond_skip bc_o arb_prog =
       return ([cmp, Branch (bc_o, rel_jmp_after block)]@block)
     ))
   end;
+
+(* ================ RISCV (thesis related) generators ================== *)
+
+(* testing *)
+
+(* speculative load v1 *)
 
 
 (* ================ Previction generator ================== *)
