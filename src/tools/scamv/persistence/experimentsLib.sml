@@ -55,7 +55,7 @@ in
         let
           (* TODO: Stack pointer needs to be handled *)
           (* TODO: maybe want to check that we indeed get R0-R29 or whatever *)
-          val _ = if String.isPrefix "R" k then () else
+          val _ = if String.isPrefix "x" k then () else
                     raise ERR "gen_json_state" "input not as exptected";
 
           val regname = "x" ^ (String.extract(k, 1, NONE));
