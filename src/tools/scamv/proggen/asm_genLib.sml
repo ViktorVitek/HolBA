@@ -136,20 +136,21 @@ val arb_program_load = arb_list_of arb_load_indir;
 fun arb_program_cond bc_o cmpops arb_prog_left arb_prog_right =
   let
     fun rel_jmp_after bl = Imm (((length bl) + 1) * 4); (*hmm*)
+    fun rel_jmp_after_for_last_jump bl = Imm (((length bl)) * 4); (*hmm*)
     val (areg, breg) = cmpops;
 
     (*val labelstring = "label2021";*)
 
     val arb_prog      = arb_prog_left  >>= (fn blockl =>
                         arb_prog_right >>= (fn blockr =>
-                           let val blockl_wexit = blockl@[Branch (NONE, rel_jmp_after blockr)] in (*Label(labelstring), Nop*)
+                           let val blockl_wexit = blockl@[Nop] in (*[Branch (NONE, rel_jmp_after_for_last_jump blockr)], Label(labelstring), Nop*)
                            (*add arm return function, later change depending on arch
                            return ([Compare cmpops,
                                     Branch (bc_o, rel_jmp_after blockl_wexit)]
                                   @blockl_wexit
                                   @blockr)
                            *)
-                             return ([BranchCompare (bc_o, rel_jmp_after blockl_wexit, areg, breg)]
+                             return ([BranchCompare (bc_o, rel_jmp_after_for_last_jump blockl_wexit, areg, breg)]
                                     @blockl_wexit
                                     @blockr)
                            end
