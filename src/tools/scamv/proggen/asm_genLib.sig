@@ -47,6 +47,9 @@ sig
     val arb_program_xart_br_yld : ArmInstruction list Gen;
     val arb_program_xart_br_yld_mod1 : ArmInstruction list Gen;
 
+    val arb_program_xartld_br_yld : ArmInstruction list Gen;
+    val arb_program_xartld_br_yld_mod1 : ArmInstruction list Gen;
+
     val arb_program_spectre_v1 : ArmInstruction list Gen;
     val arb_program_spectre_v1_mod1 : ArmInstruction list Gen;
 

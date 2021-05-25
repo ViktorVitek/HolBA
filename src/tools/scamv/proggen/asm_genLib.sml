@@ -152,9 +152,16 @@ val arb_instruction_noload_nobranch =
 
 val arb_instruction_art =
             frequency
-                [(1, arb_slli) (*add slli*)
+                [(1, arb_slli)
                 ,(1, arb_div)
                 ,(1, arb_add)]
+
+val arb_instruction_art_or_load =
+            frequency
+                [(1, arb_slli)
+                ,(1, arb_div)
+                ,(1, arb_add)
+                ,(3, arb_load)]
 
 val arb_program_noload_nobranch = arb_list_of arb_instruction_noload_nobranch;
 
@@ -488,7 +495,29 @@ in
 end;
 
 (* speculative load using loads and art + branch *)
-(*use some kind of freq function*)
+local
+    val arb_div_instr = arb_instruction_art_or_load;
+    fun arb_upto_n_art i =
+      sized (fn n => choose (i, n)) >>= (fn n =>
+      resize n (arb_list_of arb_div_instr));
+    val arb_load_instr = arb_load_indir;
+    fun arb_upto_n_lds i =
+      sized (fn n => choose (i, n)) >>= (fn n =>
+      resize n (arb_list_of arb_load_instr));
+in
+  val arb_program_xartld_br_yld =
+    (arb_upto_n_art 0) >>= (fn block1 =>
+    arb_branchcond_cond >>= (fn bc_o =>
+    arb_program_cond_skip bc_o (arb_upto_n_lds 1) >>= (fn block2 =>
+      return (block1 @ block2)
+    )));
+  val arb_program_xartld_br_yld_mod1 =
+    (arb_upto_n_art 0) >>= (fn block1 =>
+    arb_branchcond_cond >>= (fn bc_o =>
+    arb_program_cond_arb_cmp bc_o (arb_upto_n_lds 1) (return [Nop]) >>= (fn block2 =>
+      return (block1 @ block2)
+    )));
+end;
 
 (* spectre version *)
 
