@@ -18,7 +18,7 @@ select_mem exp =
   | BExp_BinPred bp e1 e2 => select_mem e1 ++ select_mem e2
   | BExp_MemEq e1 e2 => select_mem e1 ++ select_mem e2
   | BExp_IfThenElse e1 e2 e3 => select_mem e1 ++ select_mem e2 ++ select_mem e3
-  | BExp_Load e1 e2 a b =>   e2 :: (select_mem e1 ++ select_mem e2) 
+  | BExp_Load e1 e2 a b =>   e2 :: (select_mem e1 ++ select_mem e2)
   | BExp_Store e1 e2 a e3 => e2 :: (select_mem e1 ++ select_mem e2 ++ select_mem e3)
   | _ => [])
 
@@ -75,7 +75,7 @@ val add_obs_pc_def = Define`
 (* observe whole memory address *)
 (* ============================================================================== *)
 val observe_mem_addr_def = Define`
-    observe_mem_addr e = 
+    observe_mem_addr e =
       BStmt_Observe 0
                     (BExp_Const (Imm1 1w))
                     [e]
@@ -83,7 +83,7 @@ val observe_mem_addr_def = Define`
 `;
 
 val add_obs_mem_addr_armv8_def = Define`
-    add_obs_mem_addr_armv8 mem_bounds p = 
+    add_obs_mem_addr_armv8 mem_bounds p =
       map_obs_prog (add_obs_constr_mem_block mem_bounds observe_mem_addr) p
 `;
 
@@ -91,7 +91,7 @@ val add_obs_mem_addr_armv8_def = Define`
 (* observe whole memory address and pc *)
 (* ============================================================================== *)
 val add_obs_mem_addr_pc_armv8_def = Define`
-    add_obs_mem_addr_pc_armv8 mem_bounds p = 
+    add_obs_mem_addr_pc_armv8 mem_bounds p =
       map_obs_prog (add_obs_pc_block o (add_obs_constr_mem_block mem_bounds observe_mem_addr)) p
 `;
 
@@ -100,7 +100,7 @@ val add_obs_mem_addr_pc_armv8_def = Define`
    (prepend observation to specific block) *)
 (* ============================================================================== *)
 val prepend_obs_in_bir_block_def = Define`
-    prepend_obs_in_bir_block id_obs block = 
+    prepend_obs_in_bir_block id_obs block =
       let (lbl, obs) = id_obs in
         if lbl = block.bb_label
         then block with bb_statements := APPEND obs block.bb_statements
@@ -119,7 +119,7 @@ val observe_mem_tag_index_def = Define`
     observe_mem_tag_index e =
          BStmt_Observe 0
                        (BExp_Const (Imm1 1w))
-                       ([BExp_BinExp BIExp_RightShift e (BExp_Const (Imm64 6w))])
+                       ([BExp_BinExp BIExp_RightShift e (BExp_Const (Imm64 4w))]) (*change to riscv cache*)
                        HD
 `;
 
@@ -134,7 +134,7 @@ val observe_mem_tag_def = Define`
     observe_mem_tag e =
          BStmt_Observe 0
                        (BExp_Const (Imm1 1w))
-                       ([BExp_BinExp BIExp_RightShift e (BExp_Const (Imm64 13w))])
+                       ([BExp_BinExp BIExp_RightShift e (BExp_Const (Imm64 12w))]) (*change to riscv cache*)
                        HD
 `;
 
@@ -151,8 +151,8 @@ val observe_mem_index_def = Define`
            0
            (BExp_Const (Imm1 1w))
            ([BExp_BinExp BIExp_And
-                    (BExp_Const (Imm64 0x7Fw))
-                    (BExp_BinExp BIExp_RightShift e (BExp_Const (Imm64 6w)))])
+                    (BExp_Const (Imm64 0xFFw)) (*change to riscv cache*)
+                    (BExp_BinExp BIExp_RightShift e (BExp_Const (Imm64 4w)))]) (*change to riscv cache*)
            HD
 `;
 
@@ -170,12 +170,12 @@ val observe_mem_subset_def = Define`
            (BExp_BinPred BIExp_LessThan
                (BExp_Const (Imm64 60w))
                (BExp_BinExp BIExp_Mod
-                     (BExp_BinExp BIExp_RightShift e (BExp_Const (Imm64 6w)))
+                     (BExp_BinExp BIExp_RightShift e (BExp_Const (Imm64 4w))) (*change to riscv cache*)
                      (BExp_Const (Imm64 128w))))
                             (* (BExp_BinExp BIExp_And *)
                             (*              (BExp_Const (Imm64 0x1000w))) *)
                             (*          (BExp_Const (Imm64 0w))) *)
-           ([BExp_BinExp BIExp_RightShift e (BExp_Const (Imm64 6w))])
+           ([BExp_BinExp BIExp_RightShift e (BExp_Const (Imm64 4w))]) (*change to riscv cache*)
            HD
 `;
 
@@ -193,12 +193,12 @@ val observe_mem_subset_page_def = Define`
            (BExp_BinPred BIExp_LessThan
                 (BExp_Const (Imm64 63w))
                 (BExp_BinExp BIExp_Mod
-                   (BExp_BinExp BIExp_RightShift e (BExp_Const (Imm64 6w)))
+                   (BExp_BinExp BIExp_RightShift e (BExp_Const (Imm64 4w))) (*change to riscv cache*)
                    (BExp_Const (Imm64 128w))))
                             (* (BExp_BinExp BIExp_And *)
                             (*              (BExp_Const (Imm64 0x1000w))) *)
                             (*          (BExp_Const (Imm64 0w))) *)
-           ([BExp_BinExp BIExp_RightShift e (BExp_Const (Imm64 6w))])
+           ([BExp_BinExp BIExp_RightShift e (BExp_Const (Imm64 4w))]) (*change to riscv cache*)
            HD
 `;
 
@@ -217,9 +217,9 @@ val observe_mem_line_def = Define`
               ([BExp_BinExp BIExp_RightShift (
                   BExp_BinExp BIExp_And e (
                     BExp_BinExp BIExp_LeftShift
-                         (BExp_Const (Imm64 0x7Fw))
-                         (BExp_Const (Imm64 6w))))
-                (BExp_Const (Imm64 6w))])
+                         (BExp_Const (Imm64 0xFFw))
+                         (BExp_Const (Imm64 4w))))
+                (BExp_Const (Imm64 4w))]) (*change to riscv cache*)
               HD
 `;
 
