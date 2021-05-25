@@ -15,7 +15,9 @@ sig
             | Compare of Operand * Operand
             | Nop
             | Add     of Operand * Operand * Operand
+            | Div     of Operand * Operand * Operand
             | Lsl     of Operand * Operand * Operand
+            | Slli     of Operand * Operand * Operand
             | BranchCompare  of BranchCond option * Operand * Operand * Operand
             | Label of string
 
@@ -41,6 +43,9 @@ sig
 
     val arb_program_xld_br_yld : ArmInstruction list Gen;
     val arb_program_xld_br_yld_mod1 : ArmInstruction list Gen;
+
+    val arb_program_xart_br_yld : ArmInstruction list Gen;
+    val arb_program_xart_br_yld_mod1 : ArmInstruction list Gen;
 
     val arb_program_spectre_v1 : ArmInstruction list Gen;
     val arb_program_spectre_v1_mod1 : ArmInstruction list Gen;

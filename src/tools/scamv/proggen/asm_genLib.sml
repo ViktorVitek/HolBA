@@ -20,7 +20,9 @@ datatype ArmInstruction =
          | Compare of Operand * Operand
          | Nop
          | Add     of Operand * Operand * Operand
+          | Div     of Operand * Operand * Operand
 	        | Lsl     of Operand * Operand * Operand
+          | Slli     of Operand * Operand * Operand
           | BranchCompare of BranchCond option * Operand * Operand * Operand
           | Label of string
 
@@ -34,6 +36,8 @@ fun pp_operand (Imm n) = ".+0x" ^ Int.fmt StringCvt.HEX n (*could be that instea
     "" ^ src ^ "(" ^ src2 ^ ")"
   | pp_operand (Reg str) = str
 
+fun pp_slli (Imm n) = "0x" ^ Int.toString n
+
 fun pp_opcode (Load _)    = "lw"
   | pp_opcode (Store _)  = "sw"
   (*| pp_opcode (Branch _)  = "j " (*translates to this from "j"*)*)
@@ -41,7 +45,9 @@ fun pp_opcode (Load _)    = "lw"
   | pp_opcode (Compare _) = "fcmp"
   | pp_opcode (Nop)       = "nop"
   | pp_opcode (Add _)     = "add"
+  | pp_opcode (Div _)     = "div"
   | pp_opcode (Lsl _)     = "slli"
+  | pp_opcode (Slli _)     = "slli"
 
 fun pp_cond bc =
     case bc of
@@ -69,8 +75,12 @@ fun pp_instr instr =
        "nop"
      | Add (target, a, b) =>
        "add " ^ pp_operand target ^ ", " ^ pp_operand a ^ ", " ^ pp_operand b
+     | Div (target, a, b) =>
+       "div " ^ pp_operand target ^ ", " ^ pp_operand a ^ ", " ^ pp_operand b
      | Lsl (target,source ,b) =>
        "slli " ^ pp_operand target ^ ", " ^ pp_operand source ^ ", " ^ pp_operand b
+       | Slli (target,source ,b) =>
+         "slli " ^ pp_operand target ^ ", " ^ pp_operand source ^ ", " ^ pp_slli b
      | BranchCompare (SOME cond, target, a, b) =>
        "b" ^ pp_cond cond ^ " " ^ pp_operand a ^ ", " ^ pp_operand b ^ ", " ^ pp_operand target (*^ target if label use this*)(*add name of label here*)
      | Label (name) =>
@@ -86,6 +96,12 @@ local
 in
   val arb_addr = choose (min_addr, max_addr);
 end
+local
+  val min_addr1 = 0x0;
+  val max_addr1 = 0xf;
+in
+  val arb_slli_addr = choose (min_addr1, max_addr1);
+end
 
 val arb_armv8_regname =
     let
@@ -94,6 +110,7 @@ val arb_armv8_regname =
         elements (regs 30)
     end;
 
+val arb_slli_imm = Imm <$> arb_slli_addr;
 val arb_imm = Imm <$> arb_addr;
 val arb_reg = Reg <$> arb_armv8_regname;
 val arb_operand =
@@ -123,10 +140,20 @@ val arb_compare = Compare <$> (two arb_reg arb_reg);
 val arb_nop = return Nop;
 val arb_add = (fn (t, (a, b)) => Add (t,a,b)) <$> (two arb_reg (two arb_reg arb_reg));
 
+val arb_div = (fn (t, (a, b)) => Div (t,a,b)) <$> (two arb_reg (two arb_reg arb_reg));
+
+val arb_slli = (fn (t, (a, b)) => Slli (t,a,b)) <$> (two arb_reg (two arb_reg arb_slli_imm));
+
 val arb_instruction_noload_nobranch =
             frequency
                 [(1, arb_compare)
                 ,(1, arb_nop)
+                ,(1, arb_add)]
+
+val arb_instruction_art =
+            frequency
+                [(1, arb_slli) (*add slli*)
+                ,(1, arb_div)
                 ,(1, arb_add)]
 
 val arb_program_noload_nobranch = arb_list_of arb_instruction_noload_nobranch;
@@ -143,7 +170,7 @@ fun arb_program_cond bc_o cmpops arb_prog_left arb_prog_right =
 
     val arb_prog      = arb_prog_left  >>= (fn blockl =>
                         arb_prog_right >>= (fn blockr =>
-                           let val blockl_wexit = blockl@[Nop] in (*[Branch (NONE, rel_jmp_after_for_last_jump blockr)], Label(labelstring), Nop*)
+                           let val blockl_wexit = blockl@[Branch (NONE, rel_jmp_after_for_last_jump blockr), Nop] in (*[Branch (NONE, rel_jmp_after_for_last_jump blockr)], Label(labelstring), Nop*)
                            (*add arm return function, later change depending on arch
                            return ([Compare cmpops,
                                     Branch (bc_o, rel_jmp_after blockl_wexit)]
@@ -172,13 +199,6 @@ fun arb_program_cond_skip bc_o arb_prog =
       return ([cmp, Branch (bc_o, rel_jmp_after block)]@block)
     ))
   end;
-
-(* ================ RISCV (thesis related) generators ================== *)
-
-(* testing *)
-
-(* speculative load v1 *)
-
 
 (* ================ Previction generator ================== *)
 val arb_program_previct1 =
@@ -432,6 +452,48 @@ val arb_program_straightline_branch =
   in
     arb_leftright >>= (fn (l,r) => arb_program_straightline_cond (return l) (return r))
   end;
+
+
+(* ================ RISCV (thesis related) generators ================== *)
+
+(* testing *)
+
+(* speculative load using loads + branch *)
+(*use xld_br_yld_mod1*)
+
+
+(* speculative load using art + branch *)
+local
+    val arb_div_instr = arb_instruction_art;
+    fun arb_upto_n_art i =
+      sized (fn n => choose (i, n)) >>= (fn n =>
+      resize n (arb_list_of arb_div_instr));
+    val arb_load_instr = arb_load_indir;
+    fun arb_upto_n_lds i =
+      sized (fn n => choose (i, n)) >>= (fn n =>
+      resize n (arb_list_of arb_load_instr));
+in
+  val arb_program_xart_br_yld =
+    (arb_upto_n_art 0) >>= (fn block1 =>
+    arb_branchcond_cond >>= (fn bc_o =>
+    arb_program_cond_skip bc_o (arb_upto_n_lds 1) >>= (fn block2 =>
+      return (block1 @ block2)
+    )));
+  val arb_program_xart_br_yld_mod1 =
+    (arb_upto_n_art 0) >>= (fn block1 =>
+    arb_branchcond_cond >>= (fn bc_o =>
+    arb_program_cond_arb_cmp bc_o (arb_upto_n_lds 1) (return [Nop]) >>= (fn block2 =>
+      return (block1 @ block2)
+    )));
+end;
+
+(* speculative load using loads and art + branch *)
+(*use some kind of freq function*)
+
+(* spectre version *)
+
+(* straightline speculation version *)
+
 
 (* ================================ *)
 fun prog_gen_a_la_qc_gen do_resize gen n =
