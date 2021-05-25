@@ -161,7 +161,7 @@ val arb_instruction_art_or_load =
                 [(1, arb_slli)
                 ,(1, arb_div)
                 ,(1, arb_add)
-                ,(3, arb_load)]
+                ,(3, arb_load_indir)]
 
 val arb_program_noload_nobranch = arb_list_of arb_instruction_noload_nobranch;
 
@@ -201,9 +201,9 @@ fun arb_program_cond_skip bc_o arb_prog =
   let
     fun rel_jmp_after bl = Imm (((length bl) + 1) * 4);
   in
-    arb_compare >>= (fn cmp =>
+    (two arb_reg arb_reg) >>= (fn (areg, breg) =>
     arb_prog    >>= (fn block =>
-      return ([cmp, Branch (bc_o, rel_jmp_after block)]@block)
+      return ([BranchCompare (bc_o, rel_jmp_after block, areg, breg)]@block)
     ))
   end;
 

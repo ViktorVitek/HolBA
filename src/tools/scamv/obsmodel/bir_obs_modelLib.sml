@@ -81,13 +81,13 @@ open bir_cfgLib;
 	    val targets = #CFGN_targets n;
 	    val descr_o = #CFGN_hc_descr n;
 	    val n_type  = #CFGN_type n;
-		
+
 	    val acc_new = (if cfg_node_type_eq (n_type, CFGNT_CondJump) then [entry] else [])@acc;
 	    val targets_to_visit = List.filter (fn x => List.all (fn y => not (identical x y)) visited) targets;
-	    
+
 	in
-	    List.foldr (fn (entry',(visited',acc')) => traverse_graph g entry' visited' acc') 
-		       (entry::visited, acc_new) 
+	    List.foldr (fn (entry',(visited',acc')) => traverse_graph g entry' visited' acc')
+		       (entry::visited, acc_new)
 		       targets_to_visit
 	end;
 
@@ -98,15 +98,15 @@ open bir_cfgLib;
 	    val descr_o = #CFGN_hc_descr n;
 	    val n_type  = #CFGN_type n;
 
-	    val (targets_to_visit, acc_new) = 
-		if (cfg_node_type_eq (n_type, CFGNT_CondJump)) orelse (depth = 0) 
+	    val (targets_to_visit, acc_new) =
+		if (cfg_node_type_eq (n_type, CFGNT_CondJump)) orelse (depth = 0)
 		then ([], (if cfg_node_type_eq (n_type, CFGNT_CondJump) then [entry] else [])@acc)
 		else (List.filter (fn x => List.all (fn y => not (identical x y)) visited) targets,
 		      (if cfg_node_type_eq (n_type, CFGNT_CondJump) then [entry] else [])@acc)
 	in
 
-	    List.foldr (fn(entry',(visited',acc')) => traverse_graph_branch g (depth-1) entry' visited' acc') 
-		       (entry::visited, acc_new) 
+	    List.foldr (fn(entry',(visited',acc')) => traverse_graph_branch g (depth-1) entry' visited' acc')
+		       (entry::visited, acc_new)
 		       targets_to_visit
 	end;
 
@@ -257,16 +257,16 @@ open bir_cfgLib;
           go stmts
         end
 
- fun branch_instrumentation obs_fun prog depth = 	
+ fun branch_instrumentation obs_fun prog depth =
     let (* build the dictionaries using the library under test *)
 	val bl_dict = gen_block_dict prog;
 	val lbl_tms = get_block_dict_keys bl_dict;
 	(* build the cfg and update the basic blocks *)
 	val n_dict = cfg_build_node_dict bl_dict lbl_tms;
-	    
+
 	val entries = [mk_key_from_address64 64 (Arbnum.fromHexString "0")];
 	val g1 = cfg_create "specExec" entries n_dict bl_dict;
-	    
+
 	val (visited_nodes,cjmp_nodes) = traverse_graph g1 (hd (#CFGG_entries g1)) [] [];
   (* targets: each element in this list is a two-element list of branch targets
      there is one such element for each cjmp in the program *)
@@ -291,7 +291,7 @@ in
       val obs_hol_type = ``bir_val_t``;
       val pipeline_depth = 3;
       fun add_obs mb t =
-        branch_instrumentation obs_all_refined (bir_arm8_mem_addr_pc_model.add_obs mb t) pipeline_depth;
+        branch_instrumentation obs_all_refined (bir_arm8_cache_line_model.add_obs mb t) pipeline_depth; (*removed offset bits*)
     end;
 
   structure bir_arm8_cache_speculation_first_model : OBS_MODEL =
