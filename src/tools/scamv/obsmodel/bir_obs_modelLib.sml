@@ -291,7 +291,7 @@ in
       val obs_hol_type = ``bir_val_t``;
       val pipeline_depth = 3;
       fun add_obs mb t =
-        branch_instrumentation obs_all_refined (bir_arm8_cache_line_model.add_obs mb t) pipeline_depth; (*removed offset bits*)
+        branch_instrumentation obs_all_refined (bir_arm8_mem_addr_pc_model.add_obs mb t) pipeline_depth;
     end;
 
   structure bir_arm8_cache_speculation_first_model : OBS_MODEL =
