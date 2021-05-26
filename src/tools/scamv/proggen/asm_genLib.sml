@@ -177,7 +177,7 @@ fun arb_program_cond bc_o cmpops arb_prog_left arb_prog_right =
 
     val arb_prog      = arb_prog_left  >>= (fn blockl =>
                         arb_prog_right >>= (fn blockr =>
-                           let val blockl_wexit = blockl@[Branch (NONE, rel_jmp_after_for_last_jump blockr), Nop] in (*[Branch (NONE, rel_jmp_after_for_last_jump blockr)], Label(labelstring), Nop*)
+                           let val blockl_wexit = blockl@[Branch (NONE, rel_jmp_after blockr), Nop] in (*[Branch (NONE, rel_jmp_after_for_last_jump blockr)], Label(labelstring), Nop*)
                            (*add arm return function, later change depending on arch
                            return ([Compare cmpops,
                                     Branch (bc_o, rel_jmp_after blockl_wexit)]
@@ -203,7 +203,7 @@ fun arb_program_cond_skip bc_o arb_prog =
   in
     (two arb_reg arb_reg) >>= (fn (areg, breg) =>
     arb_prog    >>= (fn block =>
-      return ([BranchCompare (bc_o, rel_jmp_after block, areg, breg)]@block)
+      return ([BranchCompare (bc_o, rel_jmp_after block, areg, breg)]@block@[Nop])
     ))
   end;
 
