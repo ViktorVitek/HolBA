@@ -50,6 +50,12 @@ sig
     val arb_program_xartld_br_yld : ArmInstruction list Gen;
     val arb_program_xartld_br_yld_mod1 : ArmInstruction list Gen;
 
+    val arb_program_xartld_br_ydiv : ArmInstruction list Gen;
+    val arb_program_xartld_br_ydiv_mod1 : ArmInstruction list Gen;
+
+    val arb_riscv_program_nobranch : ArmInstruction list Gen;
+    val arb_program_riscv_nobranch : ArmInstruction list Gen;
+
     val arb_program_spectre_v1 : ArmInstruction list Gen;
     val arb_program_spectre_v1_mod1 : ArmInstruction list Gen;
 

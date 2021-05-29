@@ -232,6 +232,8 @@ fun pgen_qc_param param =
    | "riscv_xart_br_yld_mod1" => prog_gen_a_la_qc arb_program_xart_br_yld_mod1
    | "riscv_xartld_br_yld" => prog_gen_a_la_qc arb_program_xartld_br_yld
    | "riscv_xartld_br_yld_mod1" => prog_gen_a_la_qc arb_program_xartld_br_yld_mod1
+   | "riscv_xartld_br_ydiv_mod1" => prog_gen_a_la_qc arb_program_xartld_br_ydiv_mod1
+   | "riscv_xnobranch" => prog_gen_a_la_qc arb_program_riscv_nobranch
    | _            => raise ERR "prog_gen_store_a_la_qc" "unknown qc generator";
 
 fun prog_gen_store_a_la_qc param sz    = prog_gen_store ("prog_gen_a_la_qc::"^param) true

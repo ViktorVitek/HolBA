@@ -150,6 +150,15 @@ val arb_instruction_noload_nobranch =
                 ,(1, arb_nop)
                 ,(1, arb_add)]
 
+val arb_instruction_nobranch =
+            frequency
+                [(1, arb_div)
+                ,(1, arb_nop)
+                ,(1, arb_add)
+                ,(1, arb_slli)
+                ,(1, arb_store_indir)
+                ,(1, arb_load_indir)]
+
 val arb_instruction_art =
             frequency
                 [(1, arb_slli)
@@ -162,6 +171,8 @@ val arb_instruction_art_or_load =
                 ,(1, arb_div)
                 ,(1, arb_add)
                 ,(3, arb_load_indir)]
+
+val arb_riscv_program_nobranch = arb_list_of arb_instruction_nobranch;
 
 val arb_program_noload_nobranch = arb_list_of arb_instruction_noload_nobranch;
 
@@ -519,9 +530,43 @@ in
     )));
 end;
 
-(* spectre version *)
-
-(* straightline speculation version *)
+(* timing generators version *)
+local
+    val arb_div_instr = arb_instruction_art_or_load;
+    fun arb_upto_n_art i =
+      sized (fn n => choose (i, n)) >>= (fn n =>
+      resize n (arb_list_of arb_div_instr));
+    val arb_load_instr = arb_div;
+    fun arb_upto_n_lds i =
+      sized (fn n => choose (i, n)) >>= (fn n =>
+      resize n (arb_list_of arb_load_instr));
+in
+  val arb_program_xartld_br_ydiv =
+    (arb_upto_n_art 0) >>= (fn block1 =>
+    arb_branchcond_cond >>= (fn bc_o =>
+    arb_program_cond_skip bc_o (arb_upto_n_lds 1) >>= (fn block2 =>
+      return (block1 @ block2)
+    )));
+  val arb_program_xartld_br_ydiv_mod1 =
+    (arb_upto_n_art 0) >>= (fn block1 =>
+    arb_branchcond_cond >>= (fn bc_o =>
+    arb_program_cond_arb_cmp bc_o (arb_upto_n_lds 1) (return [Nop]) >>= (fn block2 =>
+      return (block1 @ block2)
+    )));
+end;
+(* nobranchversion *)
+local
+    val arb_div_instr = arb_instruction_nobranch;
+    fun arb_upto_n_art i =
+      sized (fn n => choose (i, n)) >>= (fn n =>
+      resize n (arb_list_of arb_div_instr));
+in
+  val arb_program_riscv_nobranch =
+    (arb_upto_n_art 0) >>= (fn block1 =>
+    (arb_upto_n_art 1) >>= (fn block2 =>
+      return (block1 @ block2)
+    ));
+end;
 
 
 (* ================================ *)
