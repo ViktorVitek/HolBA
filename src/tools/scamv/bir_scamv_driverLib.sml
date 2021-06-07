@@ -31,7 +31,7 @@ open scamv_trainingLib;
   (* error handling *)
   val libname  = "bir_scamv_driverLib"
   val ERR      = Feedback.mk_HOL_ERR libname
-  val wrap_exn = Feedback.wrap_exn libname 
+  val wrap_exn = Feedback.wrap_exn libname
 
 fun print_exn_location_option printfun (lo: PolyML.location option) =
   case lo of
@@ -164,7 +164,7 @@ fun scamv_set_prog_state prog =
     end;
 
 fun scamv_phase_add_obs () =
-let 
+let
   val _ = printv 1 "Adding obs\n";
   val add_obs = #add_obs (get_obs_model (!current_obs_model_id));
   val mem_bounds =
@@ -517,6 +517,8 @@ fun match_hw_obs_model hw_obs_model =
         "cache_multiw_subset"
       | hw_cache_tag_index_part_page =>
         "cache_multiw_subset_page_boundary"
+      | hw_time =>
+        "time"
       | _ => raise ERR "match_hw_obs_model" ("unknown hw_obs_model: " ^ (PolyML.makestring hw_obs_model));
 
 fun scamv_run { max_iter = m, prog_size = sz, max_tests = tests, enumerate = enumerate
@@ -535,7 +537,7 @@ fun scamv_run { max_iter = m, prog_size = sz, max_tests = tests, enumerate = enu
         val _ = do_training := train;
         val _ = do_conc_exec := doexecconc;
         val _ = current_obs_projection := proj;
-        
+
         val prog_store_fun =
             match_prog_gen gen sz generator_param;
 
@@ -565,7 +567,7 @@ fun scamv_run { max_iter = m, prog_size = sz, max_tests = tests, enumerate = enu
         val _ = min_verb 1 (fn () => print config_str);
 
         fun skipProgExText e = "Skipping program due to exception in pipleline:\n" ^ PolyML.makestring e ^ "\n***\n";
-        
+
         fun main_loop 0 = ()
          |  main_loop n =
             (printv 1 ("Iteration: " ^ PolyML.makestring (m - n) ^ "\n");

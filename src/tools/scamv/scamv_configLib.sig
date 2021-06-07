@@ -21,6 +21,8 @@ sig
                           | hw_cache_index_numvalid
                           | hw_cache_tag_index_part
                           | hw_cache_tag_index_part_page
+			  | hw_time
+
 
     val default_cfg : scamv_config
     val print_scamv_opt_usage : unit -> unit
