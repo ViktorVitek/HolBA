@@ -172,6 +172,12 @@ val arb_instruction_art_or_load =
                 ,(1, arb_add)
                 ,(3, arb_load_indir)]
 
+val arb_instruction_art_or_load_no_div =
+            frequency
+                [(1, arb_slli)
+                ,(1, arb_add)
+                ,(2, arb_load_indir)]
+
 val arb_riscv_program_nobranch = arb_list_of arb_instruction_nobranch;
 
 val arb_program_noload_nobranch = arb_list_of arb_instruction_noload_nobranch;
@@ -532,7 +538,7 @@ end;
 
 (* timing generators version *)
 local
-    val arb_div_instr = arb_instruction_art_or_load;
+    val arb_div_instr = arb_instruction_art_or_load_no_div;
     fun arb_upto_n_art i =
       sized (fn n => choose (i, n)) >>= (fn n =>
       resize n (arb_list_of arb_div_instr));

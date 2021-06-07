@@ -30,6 +30,18 @@ val obs_hol_type = ``bir_val_t``;
 fun add_obs mb t = rand (concl (EVAL ``add_obs_mem_addr_pc_armv8 ^mb ^t``));
 end
 
+structure bir_riscv_div_model : OBS_MODEL =
+struct
+val obs_hol_type = ``bir_val_t``;
+fun add_obs mb t = rand (concl (EVAL ``add_obs_time_riscv ^mb ^t``));
+end
+
+structure bir_riscv_div_mem_pc_model : OBS_MODEL =
+struct
+val obs_hol_type = ``bir_val_t``;
+fun add_obs mb t = rand (concl (EVAL ``add_obs_time_riscv_mem_pc ^mb ^t``));
+end
+
 structure bir_arm8_cache_line_model : OBS_MODEL =
 struct
 val obs_hol_type = ``bir_val_t``;
@@ -324,6 +336,10 @@ fun get_obs_model id =
                bir_arm8_cache_speculation_model.obs_hol_type
         else if id = "cache_speculation_first" then
                bir_arm8_cache_speculation_first_model.obs_hol_type
+         else if id = "time_div" then
+                bir_riscv_div_model.obs_hol_type
+        else if id = "time_div_mem_pc" then
+               bir_riscv_div_mem_pc_model.obs_hol_type
         else
             raise ERR "get_obs_model" ("unknown obs_model selected: " ^ id);
 
@@ -344,6 +360,10 @@ fun get_obs_model id =
                bir_arm8_cache_speculation_model.add_obs
         else if id = "cache_speculation_first" then
                bir_arm8_cache_speculation_first_model.add_obs
+         else if id = "time_div" then
+                bir_riscv_div_model.add_obs
+        else if id = "time_div_mem_pc" then
+               bir_riscv_div_mem_pc_model.add_obs
         else
           raise ERR "get_obs_model" ("unknown obs_model selected: " ^ id);
   in
