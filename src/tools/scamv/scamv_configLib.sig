@@ -18,6 +18,7 @@ sig
                        | cache_speculation_first
                        | time_div
                        | time_div_mem_pc
+                       | time_div_speculation
 
     datatype hw_obs_model = hw_cache_tag_index
                           | hw_cache_index_numvalid

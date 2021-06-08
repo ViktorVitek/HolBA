@@ -314,6 +314,15 @@ in
       branch_instrumentation obs_all_refined_but_first (bir_arm8_mem_addr_pc_model.add_obs mb t) pipeline_depth;
   end;
 
+  structure bir_riscv_div_speculation_model : OBS_MODEL =
+    struct
+      val obs_hol_type = ``bir_val_t``;
+      val pipeline_depth = 3;
+      fun add_obs mb t =
+        branch_instrumentation obs_all_refined (bir_riscv_div_mem_pc_model.add_obs mb t) pipeline_depth;
+    end;
+
+
 end (* local *)
 
 
@@ -340,6 +349,8 @@ fun get_obs_model id =
                 bir_riscv_div_model.obs_hol_type
         else if id = "time_div_mem_pc" then
                bir_riscv_div_mem_pc_model.obs_hol_type
+       else if id = "time_div_speculation" then
+              bir_riscv_div_speculation_model.obs_hol_type
         else
             raise ERR "get_obs_model" ("unknown obs_model selected: " ^ id);
 
@@ -364,6 +375,8 @@ fun get_obs_model id =
                 bir_riscv_div_model.add_obs
         else if id = "time_div_mem_pc" then
                bir_riscv_div_mem_pc_model.add_obs
+       else if id = "time_div_speculation" then
+              bir_riscv_div_speculation_model.add_obs
         else
           raise ERR "get_obs_model" ("unknown obs_model selected: " ^ id);
   in

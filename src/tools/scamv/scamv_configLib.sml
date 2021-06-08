@@ -29,6 +29,7 @@ datatype obs_model = mem_address_pc
                    | cache_speculation_first
                    | time_div
                    | time_div_mem_pc
+                   | time_div_speculation
 
 datatype hw_obs_model = hw_cache_tag_index
                       | hw_cache_index_numvalid
@@ -91,8 +92,9 @@ fun obs_model_fromString om =
       | "cache_tag_index_part_page" => SOME cache_tag_index_part_page
       | "cache_speculation"         => SOME cache_speculation
       | "cache_speculation_first"   => SOME cache_speculation_first
-      | "time_div"   => SOME time_div
-      | "time_div_mem_pc" => SOME time_div_mem_pc
+      | "time_div"                  => SOME time_div
+      | "time_div_mem_pc"           => SOME time_div_mem_pc
+      | "time_div_speculation"      => SOME time_div_speculation
       | _                           => NONE
 
 fun hw_obs_model_fromString hwom =
