@@ -399,7 +399,7 @@ fun get_obs_model id =
          else if id = "time_div" then
                 bir_riscv_div_model.add_obs
         else if id = "time_div_mem_pc" then
-               bir_riscv_div_mem_pc_model.add_obs
+               bir_riscv_div_mem_pc_obs1_model.add_obs
        else if id = "time_div_speculation" then
               bir_riscv_div_speculation_model.add_obs
         else if id = "time_div_speculation_mod1" then
