@@ -36,10 +36,25 @@ val obs_hol_type = ``bir_val_t``;
 fun add_obs mb t = rand (concl (EVAL ``add_obs_time_riscv ^mb ^t``));
 end
 
+(*time div mem pc - observe 1 *)
+structure bir_riscv_div_mem_pc_obs1_model : OBS_MODEL =
+struct
+val obs_hol_type = ``bir_val_t``;
+fun add_obs mb t = rand (concl (EVAL ``add_obs_time_riscv_mem_pc_obs1 ^mb ^t``));
+end
+
+(*time div mem pc - observe 0 - used for spec *)
 structure bir_riscv_div_mem_pc_model : OBS_MODEL =
 struct
 val obs_hol_type = ``bir_val_t``;
 fun add_obs mb t = rand (concl (EVAL ``add_obs_time_riscv_mem_pc ^mb ^t``));
+end
+
+(*time div mem pc - observe 0 - used for spec *)
+structure bir_riscv_div_mem_pc_model_mod1 : OBS_MODEL =
+struct
+val obs_hol_type = ``bir_val_t``;
+fun add_obs mb t = rand (concl (EVAL ``add_obs_time_riscv_mem_pc_mod1 ^mb ^t``));
 end
 
 structure bir_arm8_cache_line_model : OBS_MODEL =
@@ -322,6 +337,14 @@ in
         branch_instrumentation obs_all_refined (bir_riscv_div_mem_pc_model.add_obs mb t) pipeline_depth;
     end;
 
+    structure bir_riscv_div_speculation_model_mod1 : OBS_MODEL =
+      struct
+        val obs_hol_type = ``bir_val_t``;
+        val pipeline_depth = 3;
+        fun add_obs mb t =
+          branch_instrumentation obs_all_refined (bir_riscv_div_mem_pc_model_mod1.add_obs mb t) pipeline_depth;
+      end;
+
 
 end (* local *)
 
@@ -348,9 +371,11 @@ fun get_obs_model id =
          else if id = "time_div" then
                 bir_riscv_div_model.obs_hol_type
         else if id = "time_div_mem_pc" then
-               bir_riscv_div_mem_pc_model.obs_hol_type
+               bir_riscv_div_mem_pc_obs1_model.obs_hol_type
        else if id = "time_div_speculation" then
               bir_riscv_div_speculation_model.obs_hol_type
+        else if id = "time_div_speculation_mod1" then
+               bir_riscv_div_speculation_model_mod1.obs_hol_type
         else
             raise ERR "get_obs_model" ("unknown obs_model selected: " ^ id);
 
@@ -377,6 +402,8 @@ fun get_obs_model id =
                bir_riscv_div_mem_pc_model.add_obs
        else if id = "time_div_speculation" then
               bir_riscv_div_speculation_model.add_obs
+        else if id = "time_div_speculation_mod1" then
+               bir_riscv_div_speculation_model_mod1.add_obs
         else
           raise ERR "get_obs_model" ("unknown obs_model selected: " ^ id);
   in

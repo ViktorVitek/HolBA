@@ -511,6 +511,8 @@ fun match_obs_model obs_model =
         "time_div_mem_pc"
       | time_div_speculation =>
         "time_div_speculation"
+      | time_div_speculation_mod1 =>
+        "time_div_speculation_mod1"
       | _ => raise ERR "match_obs_model" ("unknown obs_model " ^ PolyML.makestring obs_model);
 
 fun match_hw_obs_model hw_obs_model =

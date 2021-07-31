@@ -121,7 +121,7 @@ val add_obs_mem_addr_armv8_def = Define`
       map_obs_prog (add_obs_constr_mem_block mem_bounds observe_mem_addr) p
 `;
 
-(* observe Operands values, take highest bit
+(* observe Operands values, take highest bit, remove?
 ([BExp_BinExp BIExp_And
    (BExp_Const (Imm64 0xFFFFFFw))
    (BExp_BinExp BIExp_RightShift e (BExp_Const (Imm64 40w)))])
@@ -129,8 +129,20 @@ val add_obs_mem_addr_armv8_def = Define`
    (BExp_BinPred BIExp_LessThan (e) (BExp_Const (Imm64 0x000000ffffffffffw)))
    *)
 (* ============================================================================== *)
+(* Same 24 top bits - used in speculation *)
 val observe_timediv_def = Define`
     observe_timediv e =
+    BStmt_Observe 0
+              (BExp_Const (Imm1 1w))
+              ([BExp_BinExp BIExp_And
+                 (BExp_Const (Imm64 0xFFFFFFw))
+                 (BExp_BinExp BIExp_RightShift e (BExp_Const (Imm64 40w)))])
+              HD
+`;
+
+(* Same 24 top bits - used for time div meme pc *)
+val observe_timediv_obs1_def = Define`
+    observe_timediv_obs1 e =
       BStmt_Observe 1
                 (BExp_Const (Imm1 1w))
                 ([BExp_BinExp BIExp_And
@@ -139,20 +151,50 @@ val observe_timediv_def = Define`
                 HD
 `;
 
+
+(* Same 60 top bits - used in speculation *)
+val observe_timediv_mod1_def = Define`
+    observe_timediv_mod1 e =
+      BStmt_Observe 0
+                (BExp_Const (Imm1 1w))
+                ([BExp_BinExp BIExp_And
+                   (BExp_Const (Imm64 0xFFFFFFFFFFFFFFFw))
+                   (BExp_BinExp BIExp_RightShift e (BExp_Const (Imm64 4w)))])
+                HD
+`;
+
 (* observe div Operands *)
-(* ============================================================================== *)
-val add_obs_time_riscv_def = Define`
+(* ==================================== remove ? ========================================== *)
+(*val add_obs_time_riscv_def = Define`
     add_obs_time_riscv mem_bounds p =
       map_obs_prog (add_obs_constr_div_block mem_bounds observe_timediv) p
 `;
+
+val add_obs_time_riscv_mod1_def = Define`
+    add_obs_time_mod1_riscv mem_bounds p =
+      map_obs_prog (add_obs_constr_div_block mem_bounds observe_timediv_mod1) p
+`;*)
 
 (* observe div Operands + mem_address_pc *)
 (* ============================================================================== *)
 val add_obs_time_riscv_mem_pc_def = Define`
     add_obs_time_riscv_mem_pc mem_bounds p =
       map_obs_prog (add_obs_pc_block o (add_obs_constr_mem_block mem_bounds observe_mem_addr) o add_obs_constr_div_block mem_bounds observe_timediv) p
-      (*map_obs_prog (add_obs_constr_div_block mem_bounds observe_timediv) p *)
-      (*map_obs_prog (add_obs_pc_block o (add_obs_constr_div_block mem_bounds observe_timediv)) p*)
+`;
+
+(* observe div Operands + mem_address_pc, 60bits *)
+(* ============================================================================== *)
+val add_obs_time_riscv_mem_pc_mod1_def = Define`
+    add_obs_time_riscv_mem_pc_mod1 mem_bounds p =
+      map_obs_prog (add_obs_pc_block o (add_obs_constr_mem_block mem_bounds observe_mem_addr) o add_obs_constr_div_block mem_bounds observe_timediv_mod1) p
+`;
+
+
+(* observe div Operands + mem_address_pc, observe 1 *)
+(* ============================================================================== *)
+val add_obs_time_riscv_mem_pc_obs1_def = Define`
+    add_obs_time_riscv_mem_pc_obs1 mem_bounds p =
+       map_obs_prog (add_obs_pc_block o (add_obs_constr_mem_block mem_bounds observe_mem_addr) o add_obs_constr_div_block mem_bounds observe_timediv_obs1) p
 `;
 
 

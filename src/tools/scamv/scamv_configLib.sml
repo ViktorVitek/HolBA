@@ -30,6 +30,7 @@ datatype obs_model = mem_address_pc
                    | time_div
                    | time_div_mem_pc
                    | time_div_speculation
+                   | time_div_speculation_mod1
 
 datatype hw_obs_model = hw_cache_tag_index
                       | hw_cache_index_numvalid
@@ -95,6 +96,7 @@ fun obs_model_fromString om =
       | "time_div"                  => SOME time_div
       | "time_div_mem_pc"           => SOME time_div_mem_pc
       | "time_div_speculation"      => SOME time_div_speculation
+      | "time_div_speculation_mod1"      => SOME time_div_speculation_mod1
       | _                           => NONE
 
 fun hw_obs_model_fromString hwom =
